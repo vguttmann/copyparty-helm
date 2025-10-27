@@ -4,12 +4,16 @@ metadata:
   name: {{ include "copyparty-helm.fullname" . }}
   labels:
     {{- include "copyparty-helm.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http
       protocol: TCP
-      name: http
+      name: {{ .Values.service.name }}
   selector:
     {{- include "copyparty-helm.selectorLabels" . | nindent 4 }}
