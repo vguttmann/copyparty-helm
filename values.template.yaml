@@ -1,5 +1,4 @@
-# yaml-language-server: $schema=values.schema.json
-# Default values for actualbudget.
+# Default values for copyparty-helm.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
