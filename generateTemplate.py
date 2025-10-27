@@ -6,8 +6,9 @@ import sys
 
 # @TODO: Change on merge!
 sys.path.append('../')
-from copyparty.copyparty.cfg import flagcats
 COPYPARTY_MAIN = os.getcwd() + '/../copyparty/copyparty/__main__.py'
+print(COPYPARTY_MAIN)
+from copyparty.copyparty.cfg import flagcats
 
 def camelCase(s):
     # Use regular expression substitution to replace underscores and hyphens with spaces,
@@ -71,7 +72,7 @@ def createConfigMap():
                 if  'help sections' in line or '        ap2' in line:
                     pass
                 elif 'add_argument_group' in line:
-                    currentGroup = re.sub('\W', '_', camelCase((line.split('"')[1])))
+                    currentGroup = re.sub(r'\W', '_', camelCase((line.split('"')[1])))
 
                 else:
                     entry = ''
@@ -190,7 +191,7 @@ affinity: {}
                 if  'help sections' in line or '        ap2' in line:
                     pass
                 elif 'add_argument_group' in line:
-                    yamlContent += '\n' + re.sub('\W', '_', camelCase((line.split('"')[1]))) + ':\n'
+                    yamlContent += '\n' + re.sub(r'\W', '_', camelCase((line.split('"')[1]))) + ':\n'
                 else:
                     entry = ''
                     parsedline = escapeAnsi(line)
@@ -213,7 +214,7 @@ def getVariableInfo(key):
                 if  'help sections' in line or '        ap2' in line:
                     pass
                 elif 'add_argument_group' in line:
-                    yamlContent += '\n' + re.sub('\W', '_', camelCase((line.split('"')[1]))) + ':\n'
+                    yamlContent += '\n' + re.sub(r'\W', '_', camelCase((line.split('"')[1]))) + ':\n'
                 else:
                     if key in line:
                         entry = ''
@@ -233,7 +234,7 @@ def getVariableType(key):
                 if  'help sections' in line or '        ap2' in line:
                     pass
                 elif 'add_argument_group' in line:
-                    yamlContent += '\n' + re.sub('\W', '_', camelCase((line.split('"')[1]))) + ':\n'
+                    yamlContent += '\n' + re.sub(r'\W', '_', camelCase((line.split('"')[1]))) + ':\n'
                 else:
                     if key in line:
                         parsedline = escapeAnsi(line)
@@ -265,7 +266,7 @@ def createVolume():
     prevkey = ''
     currentkey = ''
     for key in flagcats.keys():
-        volflags += "\n      " + re.sub('\W', '_',camelCase(re.sub('\n.*', '', key))) + ':\n'
+        volflags += "\n      " + re.sub(r'\W', '_',camelCase(re.sub('\n.*', '', key))) + ':\n'
         for l2key in flagcats[key].keys():
             prevkey = currentkey
             if '=' in l2key:
@@ -298,7 +299,7 @@ def createVolflagConfigMap():
         flags:\n"""
 
         for key in flagcats.keys():
-            outerGroup = re.sub('\W', '_',camelCase(re.sub('\n.*', '', key)))
+            outerGroup = re.sub(r'\W', '_',camelCase(re.sub('\n.*', '', key)))
             for l2key in flagcats[key].keys():
                 if '=' in l2key:
                     l2key = l2key.split('=')[0]
