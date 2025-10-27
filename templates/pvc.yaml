@@ -1,11 +1,31 @@
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "chart.fullname" . }}-data
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "copyparty-helm.labels" . | nindent 4 }}
+  name: {{ template "copyparty-helm.fullname" . }}-data
+  namespace: {{ .Release.Namespace }}
 spec:
+  {{- with .Values.persistence.accessModes }}
   accessModes:
-    {{- toYaml .Values.storage.accessModes | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.persistence.storageClass }}
+    {{- if (eq "-" .) }}
+  storageClassName: ""
+    {{- else }}
+  storageClassName: {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.persistence.volumeMode }}
+  volumeMode: {{ . | quote }}
+  {{- end }}
   resources:
     requests:
-      storage: {{ .Values.storage.size}}
-  storageClassName: {{ .Values.storage.storageClass }}
+      storage: {{ .Values.persistence.size | quote }}
+{{- end }}

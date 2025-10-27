@@ -54,6 +54,34 @@ ingress:
   #    hosts:
   #      - copyparty.local
 
+# -- This is to setup the persistence for the pod more information can be found here: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistence:
+  # -- Enable persistence
+  enabled: false
+
+  # -- Actual Budget persistence annotations
+  annotations: {}
+
+  # -- Actual Budget persistence existing claim
+  existingClaim: ""
+
+  # -- Actual Budget persistence storage class
+  storageClass: ""
+
+  # -- Actual Budget persistence sub path
+  subPath: ""
+
+  # -- Actual Budget persistence volume mode
+  volumeMode: ""
+
+  # -- Actual Budget persistence access mode
+  accessModes:
+    - ReadWriteOnce
+
+  # -- Actual Budget persistence size
+  size: 10Gi
+
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
