@@ -124,6 +124,13 @@ autoscaling:
   targetCPUUtilizationPercentage: 100
   # targetMemoryUtilizationPercentage: 80
 
+# -- This will set the deployment strategy more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+strategy:
+  type: "RollingUpdate"
+  rollingUpdate:
+    maxSurge: "100%"
+    maxUnavailable: 0
+
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts: []
 
