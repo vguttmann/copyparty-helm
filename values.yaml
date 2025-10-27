@@ -109,6 +109,9 @@ generalOptions:
   # require username and password for login; default is just password
   # type: BOOLEAN
   usernames:
+  # change working-directory to PATH before mapping volumes
+  # type: PATH
+  chdir:
   # enable the ?dots url parameter / client option which allows clients to see dotfiles / hidden files (volflag=dots)
   # type: BOOLEAN
   ed:
@@ -123,6 +126,10 @@ generalOptions:
   # server name (displayed topleft in browser and in mDNS)
   # type: TXT
   name:
+  # URL for server name hyperlink (displayed topleft in browser)
+  # type: TXT
+  nameurl:
+  namehtml:
   # REPEATABLE: map file EXTension to MIMEtype, for example [jpg=image/jpeg]
   # type: EXT=MIME
   # type: ARRAY
@@ -140,6 +147,9 @@ generalOptions:
   # show versions and exit
   # type: BOOLEAN
   version:
+  # show version and exit
+  # type: BOOLEAN
+  versionb:
 
 qrOptions:
   # show QR-code on startup
@@ -171,8 +181,32 @@ qrOptions:
   # sticky/pin the qr-code to always stay on-screen; [0]=disabled, [1]=with-url, [2]=just-qr
   # type: N
   qrpin:
+  # wait SEC before printing the qr-code to the log
+  # type: SEC
+  qrwait:
+  # print the qr-code every SEC (try this with/without --qr-pin in case of issues)
+  # type: SEC
+  qrevery:
+  # when --qr-pin is enabled, check for terminal size change every SEC
+  # type: SEC
+  qrwinch:
+  # REPEATABLE: write qr-code to file.\n └─To create txt or svg, TXT is Filepath:Zoom:Pad, for example [qr.txt:1:2]\n └─To create png or gif, TXT is Filepath:Zoom:Pad:Foreground:Background, for example [qr.png:8:2:333333:ffcc55], or [qr.png:8:2::ffcc55] for transparent
+  # type: TXT
+  # type: ARRAY
+  # REPEATABLE: YES (use YAML array) 
+  qrfile:
+  # always display the QR-code on STDOUT in the terminal, even if -q
+  # type: BOOLEAN
+  qrstdout:
+  # always display the QR-code on STDERR in the terminal, even if -q
+  # type: BOOLEAN
+  qrstderr:
 
 filesystemOptions:
+  # detect and prevent CI (case-insensitive) behavior if the underlying filesystem is CI? [y] = detect and prevent, [n] = ignore and allow, [auto] = y if CI fs detected. NOTE: y is very slow but necessary for correct WebDAV behavior on Windows/Macos (volflag=casechk)
+  # type: N
+  # default: auto
+  casechk:
   # if a file cannot be deleted because it is busy, continue trying for T seconds, retry every R seconds; disable with 0/0 (volflag=rm_retry)
   # type: T/R
   rmretry:
@@ -194,6 +228,10 @@ shareUrlOptions:
   # database to store shares in
   # type: FILE
   shrdb:
+  # who can create a share? [no]=nobody, [a]=admin-permission, [auth]=authenticated (volflag=shr_who)
+  # type: TXT
+  # default: auth
+  shrwho:
   # comma-separated list of users allowed to view/delete any share
   # type: U,U
   # default: [empty string] 
@@ -227,6 +265,9 @@ uploadOptions:
   # grace period where uploads can be deleted by the uploader, even without delete permissions; 0=disabled, default=12h
   # type: SEC
   unpost:
+  # clients can undo recent uploads by using the unpost tab (requires -e2d). [0] = never allowed (disable feature), [1] = allow if client has the same IP as the upload AND is using the same account, [2] = just check the IP, [3] = just check account-name (volflag=unp_who)
+  # type: NUM
+  unpwho:
   # clients can abort incomplete uploads by using the unpost tab (requires -e2d). [0] = never allowed (disable feature), [1] = allow if client has the same IP as the upload AND is using the same account, [2] = just check the IP, [3] = just check account-name (volflag=u2abort)
   # type: NUM
   u2abort:
@@ -256,6 +297,9 @@ uploadOptions:
   # unix group-id to chown new files/folders to; default = -1 = do-not-change (volflag=gid)
   # type: N
   gid:
+  # allow uploading even if a volume is inside a ramdisk, meaning that all data will be lost on the next server reboot (volflag=wram)
+  # type: BOOLEAN
+  wram:
   # enable symlink-based upload deduplication (volflag=dedup)
   # type: BOOLEAN
   dedup:
@@ -274,6 +318,9 @@ uploadOptions:
   # reject duplicate files during upload; only matches within the same volume (volflag=nodupe)
   # type: BOOLEAN
   nodupe:
+  # also reject dupes when moving a file into another volume (volflag=nodupem)
+  # type: BOOLEAN
+  nodupem:
   # do not use existing data on disk to satisfy dupe uploads; reduces server HDD reads in exchange for much more network load (volflag=noclone)
   # type: BOOLEAN
   noclone:
@@ -286,10 +333,17 @@ uploadOptions:
   # forget unfinished uploads after MIN minutes; impossible to resume them after that (360=6h, 1440=24h)
   # type: MIN
   snapdrop:
+  # delete the .PARTIAL file when an unfinished upload expires after --snap-drop (volflag=rm_partial)
+  # type: BOOLEAN
+  rmpartial:
   # how to timestamp uploaded files; [c]=client-last-modified, [u]=upload-time, [fc]=force-c, [fu]=force-u (volflag=u2ts)
   # type: TXT
   # default: c
   u2ts:
+  # default timezone for the rotf upload rule; examples: [Europe/Oslo], [America/Toronto], [Antarctica/South_Pole] (volflag=rotf_tz)
+  # type: TXT
+  # default: UTC
+  rotftz:
   # force randomized filenames, --nrand chars long (volflag=rand)
   # type: BOOLEAN
   rand:
@@ -361,6 +415,9 @@ networkOptions:
   # type: PATH
   # default: [empty string] 
   rploc:
+  # do not listen on TCP/IP for http/https; only listen on unix-domain-sockets
+  # type: BOOLEAN
+  httpnotcp:
   # write list of listening-on ip:port to textfile at PATH when http-servers have started
   # type: PATH
   # default: [empty string] 
@@ -467,10 +524,16 @@ tlsCertificateGeneratorOptions:
   crtalg:
 
 idp_IdentityProvider_UserAuthenticationOptions:
-  # bypass the copyparty authentication checks if the request-header HN contains a username to associate the request with (for use with authentik/oauth/...)\nWARNING: if you enable this, make sure clients are unable to specify this header themselves; must be washed away and replaced by a reverse-proxy
+  # REPEATABLE: bypass the copyparty authentication checks if the request-header HN contains a username to associate the request with (for use with authentik/oauth/...)\nWARNING: if you enable this, make sure clients are unable to specify this header themselves; must be washed away and replaced by a reverse-proxy
   # type: HN
-  # default: [empty string] 
+  # type: ARRAY
+  # REPEATABLE: YES (use YAML array) 
   idphusr:
+  # REPEATABLE: bypass the copyparty authentication checks if the request-header T is provided, and its value exists in a mapping defined by this option; see --help-idp
+  # type: T
+  # type: ARRAY
+  # REPEATABLE: YES (use YAML array) 
+  idphmusr:
   # assume the request-header HN contains the groupname of the requesting user; can be referenced in config files for group-based access control
   # type: HN
   # default: [empty string] 
@@ -496,6 +559,22 @@ idp_IdentityProvider_UserAuthenticationOptions:
   # generate a session-token for IdP users which is written to cookie cppws (or cppwd if plaintext), to reduce the load on the IdP server, lifetime S seconds.\n └─note: The expiration time is a client hint only; the actual lifetime of the session-token is infinite (until next restart with --ses-db wiped)
   # type: S
   idpcookie:
+  # replace all login-buttons with a link to URL L (unless pw is in --auth-ord then both will be shown); [{dst}] expands to url of current page
+  # type: L
+  # default: [empty string] 
+  idplogin:
+  # the label/text for the idp-login button
+  # type: T
+  # default: Login with SSO
+  idplogint:
+  # replace all logout-buttons with a link to URL L
+  # type: L
+  # default: [empty string] 
+  idplogout:
+  # controls auth precedence; examples: [pw,idp,ipu], [ipu,pw,idp], see --help-auth-ord
+  # type: TXT
+  # default: idp,ipu
+  authord:
   # disable basic-authentication support; do not accept passwords from the 'Authenticate' header at all. NOTE: This breaks support for the android app
   # type: BOOLEAN
   nobauth:
@@ -520,6 +599,23 @@ idp_IdentityProvider_UserAuthenticationOptions:
   # type: ARRAY
   # REPEATABLE: YES (use YAML array) 
   ipu:
+  # REPEATABLE: username USR can only connect from an IP matching one or more CIDR (comma-sep.); example: [192.168.123.0/24,172.16.0.0/16=dave]
+  # type: CIDR=USR
+  # type: ARRAY
+  # REPEATABLE: YES (use YAML array) 
+  ipr:
+  # default: [empty string] 
+  haveidphdrs:
+  # default: [empty string] 
+  haveipuoripr:
+  # default: [empty string] 
+  aoidpbeforepw:
+  # default: [empty string] 
+  aohbeforehm:
+  # default: [empty string] 
+  aoipuwins:
+  # default: [empty string] 
+  aohavepw:
 
 userChangeablePasswordsOptions:
   # allow users to change their own passwords
@@ -586,6 +682,12 @@ zeroconfMdnsOptions_AlsoSeeHelpZm:
   # verboser mdns
   # type: BOOLEAN
   zmvv:
+  # port to announce for http/webdav; [-1] = auto, [0] = disabled, [4649] = port 4649
+  # type: PORT
+  zmhttp:
+  # port to announce for https/webdavs; [-1] = auto, [0] = disabled, [4649] = port 4649
+  # type: PORT
+  zmhttps:
   # mute parser errors (invalid incoming MDNS packets)
   # type: BOOLEAN
   zmnope:
@@ -768,6 +870,15 @@ smb_CifsOptions:
   # type: BOOLEAN
   smbvvv:
 
+opdsOptions:
+  # enable opds -- allows e-book readers to browse and download files (volflag=opds)
+  # type: BOOLEAN
+  opds:
+  # file formats to list in OPDS feeds; leave empty to show everything (volflag=opds_exts)
+  # type: T,T
+  # default: epub,cbz,pdf
+  opdsexts:
+
 handlers_SeeHelpHandlers_:
   # REPEATABLE: handle 404s by executing PY file
   # type: PY
@@ -879,6 +990,9 @@ yoloOptions:
   # allow users with write-only access to upload logues and readmes without adding the _wo_ filename prefix (volflag=wo_up_readme)
   # type: BOOLEAN
   woupreadme:
+  # when one of the emergency fallback locations are used for runtime state ($TMPDIR, /tmp), certain features will be force-disabled for security reasons by default. This option overrides that safeguard and allows unsafe storage of secrets
+  # type: BOOLEAN
+  unsafestate:
 
 optOuts:
   # never write anything to disk (debug/benchmark)
@@ -908,7 +1022,7 @@ optOuts:
   # no info hostname -- don't show in UI
   # type: BOOLEAN
   nih:
-  # no info disk-usage -- don't show in UI
+  # no info disk-usage -- don't show in UI. This is the same as --du-who no
   # type: BOOLEAN
   nid:
   # no powered-by-copyparty branding in UI
@@ -953,11 +1067,14 @@ optOuts:
   # do not write uploader-IP into the database; will also disable unpost, you may want --forget-ip instead (volflag=no_db_ip)
   # type: BOOLEAN
   nodbip:
+  # disable browsing the contents of zip/cbz files, does not affect thumbnails
+  # type: BOOLEAN
+  nozls:
 
 safetyOptions:
   # increase safety: Disable thumbnails / potentially dangerous software (ffmpeg/pillow/vips), hide partial uploads, avoid crawlers.\n └─Alias of --dotpart --no-thumb --no-mtag-ff --no-robots --force-js
   s:
-  # further increase safety: Prevent js-injection, accidental move/delete, broken symlinks, webdav, 404 on 403, ban on excessive 404s.\n └─Alias of -s --unpost=0 --no-del --no-mv --hardlink --vague-403 -nih
+  # further increase safety: Prevent js-injection, accidental move/delete, broken symlinks, webdav requires login, 404 on 403, ban on excessive 404s.\n └─Alias of -s --unpost=0 --no-del --no-mv --reflink --dav-auth --vague-403 -nih
   # type: BOOLEAN
   ss:
   # further increase safety: Enable logging to disk, scan for dangerous symlinks.\n └─Alias of -ss --no-dav --no-logues --no-readme -lo=cpp-%%Y-%%m%%d-%%H%%M%%S.txt.xz --ls=**,*,ln,p,r
@@ -997,6 +1114,10 @@ safetyOptions:
   # logout clients after H hours of inactivity; [0.0028]=10sec, [0.1]=6min, [24]=day, [168]=week, [720]=month, [8760]=year)
   # type: H
   logout:
+  # anyone at this accesslevel or above will not get banned: [av]=admin-in-volume, [aa]=has-admin-anywhere, [rw]=read-write, [auth]=authenticated, [any]=disable-all-bans, [no]=anyone-can-get-banned
+  # type: TXT
+  # default: no
+  dontban:
   # more than N wrong passwords in W minutes = ban for B minutes; disable with [no]
   # type: N,W,B
   # default: 9,60,1440
@@ -1024,7 +1145,7 @@ safetyOptions:
   # URLs which are considered sus / eligible for banning; disable with blank or [no]
   # type: R
   susurls:
-  # harmless URLs ignored from 404-bans; disable with blank or [no]
+  # harmless URLs ignored from 403/404-bans; disable with blank or [no]
   # type: R
   nonsusurls:
   # if a client is banned, reject its connection as soon as possible; not a good idea to enable when proxied behind cloudflare since it could ban your reverse-proxy
@@ -1127,6 +1248,9 @@ loggingOptions:
   # log failed login attempt passwords: 0=terse, 1=plaintext, 2=hashed
   # type: N
   logbadpwd:
+  # log any invalid XML received from a client
+  # type: BOOLEAN
+  logbadxml:
   # debug: print tcp-server msgs
   # type: BOOLEAN
   logconn:
@@ -1142,6 +1266,15 @@ loggingOptions:
   # dont log URLs matching regex RE
   # type: RE
   lfurl:
+  # fs-indexing: wait SEC between each status-message
+  # type: SEC
+  scanstr:
+  # fs-indexing: wait SEC between each 'progress:' message
+  # type: SEC
+  scanprr:
+  # fs-indexing: say 'file: <name>' when a file larger than MiB is about to be hashed
+  # type: MiB
+  scanprs:
 
 adminPanelOptions:
   # disable ?reload=cfg (reload users/volumes/volflags from config file)
@@ -1150,7 +1283,7 @@ adminPanelOptions:
   # disable ?scan (volume reindexing)
   # type: BOOLEAN
   norescan:
-  # disable ?stack (list all stacks)
+  # disable ?stack (list all stacks); same as --stack-who=no
   # type: BOOLEAN
   nostack:
   # disable ?ru (list of recent uploads)
@@ -1168,6 +1301,13 @@ adminPanelOptions:
   # let everyone see upload timestamps on the ?ru page, not just admins
   # type: BOOLEAN
   upswhen:
+  # who can see the ?stack page (list of threads)? [no]=nobody, [a]=admins, [rw]=read+write, [all]=everyone
+  # type: LVL
+  # default: a
+  stackwho:
+  # verbose ?stack
+  # type: BOOLEAN
+  stackv:
 
 thumbnailOptions:
   # disable all thumbnails (volflag=dthumb)
@@ -1232,13 +1372,16 @@ thumbnailOptions:
   # type: N,N
   # default: folder.png,folder.jpg,cover.png,cover.jpg
   thcovers:
+  # for music, do spectrograms or embedded coverart? [0]=only-art, [1]=prefer-art, [2]=only-spec
+  # type: N
+  thspecp:
   # image formats to decode using pillow
   # type: T,T
   # default: avif,avifs,blp,bmp,cbz,dcx,dds,dib,emf,eps,epub,fits,flc,fli,fpx,gif,heic,heics,heif,heifs,icns,ico,im,j2p,j2k,jp2,jpeg,jpg,jpx,pbm,pcx,pgm,png,pnm,ppm,psd,qoi,sgi,spi,tga,tif,tiff,webp,wmf,xbm,xpm
   thrpil:
   # image formats to decode using pyvips
   # type: T,T
-  # default: avif,exr,fit,fits,fts,gif,hdr,heic,jp2,jpeg,jpg,jpx,jxl,nii,pfm,pgm,png,ppm,svg,tif,tiff,webp
+  # default: avif,exr,fit,fits,fts,gif,hdr,heic,heics,heif,heifs,jp2,jpeg,jpg,jpx,jxl,nii,pfm,pgm,png,ppm,svg,tif,tiff,webp
   thrvips:
   # image formats to decode using rawpy
   # type: T,T
@@ -1399,6 +1542,9 @@ generalDbOptions:
   # defer any scheduled volume reindexing until SEC seconds after last db write (uploads, renames, ...)
   # type: SEC
   dbact:
+  # case-insensitive search for all unicode characters (the default is icase for just ascii). NOTE: will make searches much slower (around 4x), and NOTE: only applies to filenames/paths, not tags
+  # type: BOOLEAN
+  srchicase:
   # search deadline -- terminate searches running for more than SEC seconds
   # type: SEC
   srchtime:
@@ -1459,6 +1605,9 @@ metadataDbOptions:
   mtp:
 
 textfileOptions:
+  # markdown: disable newline-is-newline; will only render a newline into the html given two trailing spaces or a double-newline (volflag=md_no_br)
+  # type: BOOLEAN
+  mdnobr:
   # where to store old version of markdown files; [s]=subfolder, [v]=volume-histpath, [n]=nope/disabled (volflag=md_hist)
   # type: TXT
   # default: s
@@ -1550,11 +1699,15 @@ uiOptions:
   # default to local timezone instead of UTC
   # type: BOOLEAN
   localtime:
+  # default filesize format; one of these: 0, 1, 2, 2c, 3, 3c, 4, 4c, 5, 5c, fuzzy (see UI)
+  # type: FMT
+  # default: 1
+  uifilesz:
   # language, for example eng / nor / ...
   # type: LANG
   # default: eng
   lang:
-  # default theme to use (0..7)
+  # default theme to use (0..%d)
   # type: NUM
   theme:
   # number of themes installed
@@ -1587,6 +1740,10 @@ uiOptions:
   # type: TXT
   # default: c 000 none
   favico:
+  # URL to .ico/png/gif/svg file; --favico takes precedence unless disabled (volflag=ufavico)
+  # type: TXT
+  # default: [empty string] 
+  ufavico:
   # REPEATABLE: use thumbnail-image VP for file-extension E, example: [exe=/.res/exe.png] (volflag=ext_th)
   # type: E=VP
   # type: ARRAY
@@ -1594,6 +1751,9 @@ uiOptions:
   extth:
   # default: [empty string] 
   mpmc:
+  # tooltips disabled as default
+  # type: BOOLEAN
+  notooltips:
   # emoji or emoji,css Example: [🥖,padding:0]
   # type: TXT
   # default: 🌲
@@ -1614,6 +1774,10 @@ uiOptions:
   # type: TXT
   # default: [empty string] 
   htmlhead:
+  # text to append to the <head> of all HTML pages (except for basic-browser); similar to (and can be combined with) --html-head but only accepts static text (volflag=html_head_s)
+  # type: T
+  # default: [empty string] 
+  htmlheads:
   # if a folder contains index.html, show that instead of the directory listing by default (can be changed in the client settings UI, or add ?v to URL for override)
   # type: BOOLEAN
   ih:
@@ -1635,9 +1799,19 @@ uiOptions:
   # powered-by link; disable with -nb
   # type: URL
   pburl:
-  # show version on the control panel (incompatible with -nb)
+  # show version on the control panel (incompatible with -nb). This is the same as --ver-who all
   # type: BOOLEAN
   ver:
+  # only show version for: [a]=admin-permission-anywhere, [auth]=authenticated, [all]=anyone
+  # type: TXT
+  # default: no
+  verwho:
+  # only show disk usage for: [no]=nobody, [a]=admin-permission, [rw]=read-write, [w]=write, [auth]=authenticated, [all]=anyone (volflag=du_who)
+  # type: TXT
+  # default: all
+  duwho:
+  veriwho:
+  duiwho:
   # configure the option to enable/disable k304 on the controlpanel (workaround for buggy reverse-proxies); [0] = hidden and default-off, [1] = visible and default-off, [2] = visible and default-on
   # type: NUM
   k304:
@@ -1669,6 +1843,33 @@ uiOptions:
   # don't sandbox prologue/epilogue docs (volflags: no_sb_lg | sb_lg); enables non-js support
   # type: BOOLEAN
   nosblg:
+  # hide top-menu in the UI (volflag=ui_nombar)
+  # type: BOOLEAN
+  uinombar:
+  # hide account-info in the UI (volflag=ui_noacci)
+  # type: BOOLEAN
+  uinoacci:
+  # hide server-info in the UI (volflag=ui_nosrvi)
+  # type: BOOLEAN
+  uinosrvi:
+  # hide navpane+breadcrumbs (volflag=ui_nonav)
+  # type: BOOLEAN
+  uinonav:
+  # hide navpane in the UI (volflag=ui_nonav)
+  # type: BOOLEAN
+  uinotree:
+  # hide cpanel-link in the UI (volflag=ui_nocpla)
+  # type: BOOLEAN
+  uinocpla:
+  # hide link-bar in the UI (volflag=ui_nolbar)
+  # type: BOOLEAN
+  uinolbar:
+  # hide context-buttons in the UI (volflag=ui_noctxb)
+  # type: BOOLEAN
+  uinoctxb:
+  # hide repl-button in the UI (volflag=ui_norepl)
+  # type: BOOLEAN
+  uinorepl:
   # type: BOOLEAN
   haveunlistc:
 
@@ -1777,6 +1978,10 @@ volumes:
         # reject duplicate files during upload; only matches within the same volume (volflag=nodupe)
         # type: BOOLEAN
         nodupe:
+        # rejects existing files during moves as well
+        # also reject dupes when moving a file into another volume (volflag=nodupem)
+        # type: BOOLEAN
+        nodupem:
         # unix-permission for new dirs/folders
         # Example: 755
         # unix file permissions to use when creating directories; see --help-chmod. Examples: [755] = owner-RW + all-R, [777] = full-yolo (volflag=chmod_d)
@@ -1799,6 +2004,10 @@ volumes:
         # unix group-id to chown new files/folders to; default = -1 = do-not-change (volflag=gid)
         # type: N
         gid:
+        # allow uploading into ramdisks
+        # allow uploading even if a volume is inside a ramdisk, meaning that all data will be lost on the next server reboot (volflag=wram)
+        # type: BOOLEAN
+        wram:
         # force use of sparse files, mainly for s3-backed storage
         # rebuild mountpoint cache every SEC to keep track of sparse-files support; keep low on servers with removable media
         # type: SEC
@@ -1809,6 +2018,10 @@ volumes:
         # Please input the text that should appear in the copyparty config verbatim as this key's value.
         # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
         nosparse:
+        # delete unfinished uploads from HDD when they timeout
+        # delete the .PARTIAL file when an unfinished upload expires after --snap-drop (volflag=rm_partial)
+        # type: BOOLEAN
+        rm_partial:
         # enable full WebDAV write support (dangerous);PUT-operations will now OVERWRITE existing files
         # enable full write support, even if client may not be webdav. WARNING: This has side-effects -- PUT-operations will now OVERWRITE existing files, rather than inventing new filenames to avoid loss of data. You might want to instead set this as a volflag where needed. By not setting this flag, uploaded files can get written to a filename which the client does not expect (which might be okay, depending on client)
         # type: BOOLEAN
@@ -1929,11 +2142,16 @@ volumes:
         rotn:
         # date-formatted organizing
         # Example: %Y-%m/%d-%H
-        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
-        # This is expected behavior with some options that are only available as volflags.
-        # Please input the text that should appear in the copyparty config verbatim as this key's value.
-        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
+        # default timezone for the rotf upload rule; examples: [Europe/Oslo], [America/Toronto], [Antarctica/South_Pole] (volflag=rotf_tz)
+        # type: TXT
+        # default: UTC
         rotf:
+        # timezone (default=UTC)
+        # Example: Europe/Oslo
+        # default timezone for the rotf upload rule; examples: [Europe/Oslo], [America/Toronto], [Antarctica/South_Pole] (volflag=rotf_tz)
+        # type: TXT
+        # default: UTC
+        rotf_tz:
         # uploads are deleted after 1 hour
         # Example: 3600
         # generate a session-token for IdP users which is written to cookie cppws (or cppwd if plaintext), to reduce the load on the IdP server, lifetime S seconds.\n └─note: The expiration time is a client hint only; the actual lifetime of the session-token is infinite (until next restart with --ses-db wiped)
@@ -1942,7 +2160,7 @@ volumes:
 
       database_General:
         # enable database; makes files searchable + enables upload-undo
-        # clients can abort incomplete uploads by using the unpost tab (requires -e2d). [0] = never allowed (disable feature), [1] = allow if client has the same IP as the upload AND is using the same account, [2] = just check the IP, [3] = just check account-name (volflag=u2abort)
+        # clients can undo recent uploads by using the unpost tab (requires -e2d). [0] = never allowed (disable feature), [1] = allow if client has the same IP as the upload AND is using the same account, [2] = just check the IP, [3] = just check account-name (volflag=unp_who)
         # type: NUM
         e2d:
         # scan writable folders for new files on startup; also sets -e2d
@@ -2066,6 +2284,12 @@ volumes:
         # type: PROFILE
         # default: wal
         dbd:
+        # actively prevent case-insensitive filesystem? y/n
+        # Example: auto
+        # detect and prevent CI (case-insensitive) behavior if the underlying filesystem is CI? [y] = detect and prevent, [n] = ignore and allow, [auto] = y if CI fs detected. NOTE: y is very slow but necessary for correct WebDAV behavior on Windows/Macos (volflag=casechk)
+        # type: N
+        # default: auto
+        casechk:
         # cross-volume dupe detection / linking (dangerous)
         # on upload: check all volumes for dupes, not just the target volume (probably buggy, not recommended) (volflag=xlink)
         # type: BOOLEAN
@@ -2161,6 +2385,13 @@ volumes:
         # convert-to-audio timeout in seconds (volflag=aconvt)
         # type: SEC
         aconvt:
+        # make spectrograms? 0=never 1=fallback 2=always
+        # Example: 1
+        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
+        # This is expected behavior with some options that are only available as volflags.
+        # Please input the text that should appear in the copyparty config verbatim as this key's value.
+        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
+        th_spec_p:
         # use /b.png as thumbnail for file-extension s
         # Example: s
         # REPEATABLE: use thumbnail-image VP for file-extension E, example: [exe=/.res/exe.png] (volflag=ext_th)
@@ -2283,6 +2514,12 @@ volumes:
         # number of sorting rules to include in media URLs by default (volflag=hsortn)
         # type: N
         hsortn:
+        # per-volume favicon (.ico/png/gif/svg)
+        # Example: URL
+        # URL to .ico/png/gif/svg file; --favico takes precedence unless disabled (volflag=ufavico)
+        # type: TXT
+        # default: [empty string] 
+        ufavico:
         # dont list files matching REGEX
         # don't show files/folders matching REGEX in file list. WARNING: Purely cosmetic! Does not affect API calls, just the browser. Example: [\\.(js|css)$] (volflag=unlist)
         # type: REGEX
@@ -2294,6 +2531,12 @@ volumes:
         # type: TXT
         # default: [empty string] 
         html_head:
+        # additional static text in the html <head>
+        # Example: TXT
+        # text to append to the <head> of all HTML pages (except for basic-browser); similar to (and can be combined with) --html-head but only accepts static text (volflag=html_head_s)
+        # type: T
+        # default: [empty string] 
+        html_head_s:
         # theme color (a hint for webbrowsers, discord, etc.)
         # Example: #fc0
         # accent color (3 or 6 hex digits); may also affect safari and/or android-chrome (volflag=tcolor)
@@ -2304,6 +2547,12 @@ volumes:
         # do not show total recursive size of folders in listings, show inode size instead; slightly faster (volflag=nodirsz)
         # type: BOOLEAN
         nodirsz:
+        # show disk-usage info to everyone
+        # Example: all
+        # only show disk usage for: [no]=nobody, [a]=admin-permission, [rw]=read-write, [w]=write, [auth]=authenticated, [all]=anyone (volflag=du_who)
+        # type: TXT
+        # default: all
+        du_who:
         # allows indexing by search engines (default)
         # increase safety: Disable thumbnails / potentially dangerous software (ffmpeg/pillow/vips), hide partial uploads, avoid crawlers.\n └─Alias of --dotpart --no-thumb --no-mtag-ff --no-robots --force-js
         robots:
@@ -2365,6 +2614,44 @@ volumes:
         # Please input the text that should appear in the copyparty config verbatim as this key's value.
         # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
         nohtml:
+        # hide account-info in the UI
+        # hide account-info in the UI (volflag=ui_noacci)
+        # type: BOOLEAN
+        ui_noacci:
+        # hide cpanel-link in the UI
+        # hide cpanel-link in the UI (volflag=ui_nocpla)
+        # type: BOOLEAN
+        ui_nocpla:
+        # hide link-bar in the UI
+        # hide link-bar in the UI (volflag=ui_nolbar)
+        # type: BOOLEAN
+        ui_nolbar:
+        # hide top-menu in the UI
+        # hide top-menu in the UI (volflag=ui_nombar)
+        # type: BOOLEAN
+        ui_nombar:
+        # hide navpane+breadcrumbs in the UI
+        # hide navpane+breadcrumbs (volflag=ui_nonav)
+        # type: BOOLEAN
+        ui_nonav:
+        # hide navpane in the UI
+        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
+        # This is expected behavior with some options that are only available as volflags.
+        # Please input the text that should appear in the copyparty config verbatim as this key's value.
+        # !!!VARIABLE TEMPLATING INFORMATION NOT FOUND IN COPYPARTY CODE!!!
+        ui_notree:
+        # hide repl-button in the UI
+        # hide repl-button in the UI (volflag=ui_norepl)
+        # type: BOOLEAN
+        ui_norepl:
+        # hide server-info in the UI
+        # hide server-info in the UI (volflag=ui_nosrvi)
+        # type: BOOLEAN
+        ui_nosrvi:
+        # hide context-buttons in the UI
+        # hide context-buttons in the UI (volflag=ui_noctxb)
+        # type: BOOLEAN
+        ui_noctxb:
 
       opengraph_DiscordEmbeds_:
         # enable OG (disables hotlinking)
@@ -2427,7 +2714,22 @@ volumes:
         # default: [empty string] 
         og_ua:
 
+      opds:
+        # enable OPDS
+        # enable opds -- allows e-book readers to browse and download files (volflag=opds)
+        # type: BOOLEAN
+        opds:
+        # file formats to list in OPDS feeds; leave empty to show everything
+        # file formats to list in OPDS feeds; leave empty to show everything (volflag=opds_exts)
+        # type: T,T
+        # default: epub,cbz,pdf
+        opds_exts:
+
       textfiles:
+        # newline only on double-newline or two tailing spaces
+        # markdown: disable newline-is-newline; will only render a newline into the html given two trailing spaces or a double-newline (volflag=md_no_br)
+        # type: BOOLEAN
+        md_no_br:
         # where to put markdown backups; s=subfolder, v=volHist, n=nope
         # where to store old version of markdown files; [s]=subfolder, [v]=volume-histpath, [n]=nope/disabled (volflag=md_hist)
         # type: TXT
@@ -2520,6 +2822,17 @@ volumes:
         # do expensive analysis to improve accuracy of returned mimetypes; will make file-downloads, rss, and webdav slower (volflag=rmagic)
         # type: BOOLEAN
         rmagic:
+        # who can create shares? no/auth/a
+        # Example: auth
+        # who can create a share? [no]=nobody, [a]=admin-permission, [auth]=authenticated (volflag=shr_who)
+        # type: TXT
+        # default: auth
+        shr_who:
+        # unpost only if same... 1=ip+name, 2=ip, 3=name
+        # Example: 2
+        # clients can undo recent uploads by using the unpost tab (requires -e2d). [0] = never allowed (disable feature), [1] = allow if client has the same IP as the upload AND is using the same account, [2] = just check the IP, [3] = just check account-name (volflag=unp_who)
+        # type: NUM
+        unp_who:
         # restrict viewing the list of recent uploads
         # Example: 2
         # who can see recent uploads on the ?ru page? [0]=nobody, [1]=admins, [2]=everyone (volflag=ups_who)
