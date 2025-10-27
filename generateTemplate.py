@@ -105,87 +105,9 @@ data:
 
 def createValuesYAML():
     with open(COPYPARTY_MAIN) as copyparty:
-        yamlContent = '''namespace: copyparty
-replicaCount: 1
-image:
-  repository: copyparty/ac
-  pullPolicy: IfNotPresent
-  tag: "1.19.1"
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  create: true
-  automount: true
-  annotations: {}
-  name: ""
-
-podAnnotations: {}
-podLabels: {}
-
-podSecurityContext: {}
-
-securityContext: {}
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: copyparty.local
-      paths:
-        - path: /
-  tls: []
-  #  - secretName: copyparty-tls
-  #    hosts:
-  #      - copyparty.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  # increase ONLY if Copyparty will NOT write to the volumes. Also, accessMode needs to be RWX, not RWO
-  maxReplicas: 1
-  targetCPUUtilizationPercentage: 100
-  # targetMemoryUtilizationPercentage: 80
-
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-'''
+        yamlContent = ''
+        with open('values.template.yaml') as template:
+            yamlContent = template.read()           
         for line in copyparty.readlines():
             if 'add_argument' in line:
                 if  'help sections' in line or '        ap2' in line:
