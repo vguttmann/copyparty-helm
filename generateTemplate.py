@@ -7,7 +7,6 @@ import sys
 # @TODO: Change on merge!
 sys.path.append('../')
 COPYPARTY_MAIN = os.getcwd() + '/../copyparty/copyparty/__main__.py'
-print(COPYPARTY_MAIN)
 from copyparty.copyparty.cfg import flagcats
 
 def camelCase(s):
