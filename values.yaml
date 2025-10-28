@@ -2034,12 +2034,8 @@ volumes:
     mountPath: /the/actual/filesystem/path/
     existingClaim: ""
     storageClass: "longhorn-nvme"
-    resources:
-      requests:
-        storage: 2Gi
-      limits:
-        # @TODO: Sync with vmaxb
-        storage: 3Gi
+    annotations: {}
+    size: 3Gi
     # @TODO: Move to config since copyparty can't do RWX anyway (or should not at least)
     accessModes:
       - ReadWriteOnce
